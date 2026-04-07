@@ -1,5 +1,7 @@
 # rq-representation-study
 
-This repository contains code and experiments for studying how rhetorical questions are represented in large language models.
+Codebase for the paper "Rhetorical Questions in LLM Representations: A Linear Probing Study".
 
-We analyze whether rhetorical-question intent is linearly separable in LLM representations, how this signal varies across layers, how different linear probes compare, and how probing directions transfer across datasets.
+This project studies how rhetorical-question intent is represented in large language models. We analyze linear separability across layers, compare different linear probes, and examine how probing directions align and transfer across datasets.
+
+Repository contents and code will be added soon.
