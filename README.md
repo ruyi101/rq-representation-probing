@@ -1,4 +1,4 @@
-# rq-representation-study
+# rq-representation-probing
 
 Codebase for the paper "Rhetorical Questions in LLM Representations: A Linear Probing Study".
 
