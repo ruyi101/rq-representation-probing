@@ -1,8 +1,8 @@
 # rq-representation-probing
 
 **Official code for:**  
-📄 *Rhetorical Questions in Lhetorical Questions in LLM Representations: A Linear Probing Study*  
-**Authors**: Louie Hong Yao, Vishesh Anand, Yuan Zhuang, Tianyu Jiang  
+*Rhetorical Questions in LLM Representations: A Linear Probing Study*  
+**Authors:** Louie Hong Yao, Vishesh Anand, Yuan Zhuang, Tianyu Jiang
 
 ---
 
@@ -12,7 +12,7 @@ Understanding how large language models represent rhetorical questions is import
 
 This project investigates how rhetorical-question intent is encoded in LLM representations using linear probing. We study whether rhetorical questions are linearly separable from information-seeking questions, how this signal evolves across layers, how different linear probes compare, and how probing directions transfer across datasets.
 
-More broadly, the work asks whether strong transfer performance implies a shared representation, or whether different probes can achieve similar discrimination while relying on distinct representational directions.
+More broadly, this work asks whether strong transfer performance implies a shared representation, or whether different probes can achieve similar discrimination while relying on distinct representational directions.
 
 Current focus of the project includes:
 
