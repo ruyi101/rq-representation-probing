@@ -1,111 +1,114 @@
 # rq-representation-probing
 
-**Official code for:**  
-*Rhetorical Questions in LLM Representations: A Linear Probing Study*  
-**Authors:** Louie Hong Yao, Vishesh Anand, Yuan Zhuang, Tianyu Jiang
+Official code and data for:
 
----
+**Rhetorical Questions in LLM Representations: A Linear Probing Study**  
+Louie Hong Yao, Vishesh Anand, Yuan Zhuang, Tianyu Jiang
+
+The final paper PDF is included as [`cr_0419.pdf`](cr_0419.pdf).
 
 ## Overview
 
-Understanding how large language models represent rhetorical questions is important for studying non-literal language and communicative intent.
+This repository studies how large language models encode rhetorical-question intent in their internal representations. Rather than treating rhetorical-question detection only as a downstream classification task, the project asks where rhetorical signals appear in model layers, how different linear probes capture those signals, and whether probes trained on different datasets recover the same representational direction.
 
-This project investigates how rhetorical-question intent is encoded in LLM representations using linear probing. We study whether rhetorical questions are linearly separable from information-seeking questions, how this signal evolves across layers, how different linear probes compare, and how probing directions transfer across datasets.
+The paper analyzes rhetorical questions from two social-media datasets and compares three linear probes: a training-free diffMean direction, a logistic linear probe, and a hinge-loss/SVM-style linear probe. The main results show that rhetorical questions are linearly separable from information-seeking questions within datasets and remain partially detectable under cross-dataset transfer. At the same time, transfer performance does not imply a single shared rhetorical direction: probes trained on different datasets often induce different rankings over the same examples, reflecting distinct discourse-level and syntax-driven rhetorical cues.
 
-More broadly, this work asks whether strong transfer performance implies a shared representation, or whether different probes can achieve similar discrimination while relying on distinct representational directions.
+## Repository Contents
 
-Current focus of the project includes:
+The code is currently organized under `scritps/`:
 
-- analyzing rhetorical-question separability across layers,
-- comparing diffMean, logistic, and hinge-based linear probes,
-- measuring alignment between probing directions and induced rankings,
-- studying cross-dataset transfer of rhetorical signals,
-- examining the heterogeneity of rhetorical cues in LLM representations.
+- `scritps/diffmean_analysis.ipynb`  
+  Training-free diffMean probing and layer-wise analysis.
+- `scritps/generate_embeddings.py`  
+  Layer-wise last-token embeddings from Hugging Face models.
+- `scritps/generate_embeddings_mean.py`  
+  Layer-wise mean-pooled embeddings from Hugging Face models.
+- `scritps/generate_embeddings_bert.py`  
+  Layer-wise CLS-token embeddings from ModernBERT.
+- `scritps/pca_transform.py`  
+  Layer-wise PCA compression for saved embedding tensors.
+- `scritps/linear_model_training/`  
+  Logistic and hinge-loss linear probe training code.
+- `scritps/linear_model_analysis/`  
+  Analysis notebooks for probe direction alignment, ranking agreement, projection AUROC, projection transfer, Spearman correlation, and Jaccard overlap in the original representation space.
+- `scritps/pca_map_back/`  
+  Notebooks for PCA-space analysis and mapping learned probe directions back to the original embedding space.
 
 ## Data
 
-The repository includes the RQ dataset at `data/RQ.csv`. The file contains context-question pairs with labels and dataset split metadata used for the rhetorical-question analyses.
+The repository includes the RQ dataset at `data/RQ.csv`. Each row contains a context, question, label, split metadata, and a concatenated `question_with_context` field used by the analyses.
 
-The SRAQ data is not included in this repository. It should be obtained from the source associated with the SRAQ paper and placed in the local data directory before running analyses that depend on SRAQ.
+The SRAQ dataset is not included in this repository. To reproduce SRAQ experiments, obtain the data from the source associated with the SRAQ paper and place the corresponding CSV file in the local data directory.
 
-## Code
+## Workflow
 
-The code is organized under `scritps/`:
+### 1. Generate Embeddings
 
-- `scritps/diffmean_analysis.ipynb`  
-  Runs the plain diffMean analysis on model representations.
-- `scritps/generate_embeddings.py`  
-  Generates layer-wise last-token embeddings from Hugging Face models for a benchmark CSV.
-- `scritps/generate_embeddings_mean.py`  
-  Generates layer-wise mean-pooled embeddings from Hugging Face models for a benchmark CSV.
-- `scritps/generate_embeddings_bert.py`  
-  Generates layer-wise CLS-token embeddings using ModernBERT.
-- `scritps/pca_transform.py`  
-  Applies layer-wise PCA to embedding `.pt` files and saves both compressed embeddings and PCA bases.
-- `scritps/linear_model_training/`  
-  Contains code for training layer-wise linear probes with logistic loss or hinge/SVM-style loss.
-- `scritps/linear_model_analysis/`  
-  Contains notebooks for analyses in the original representation space, including within-dataset cosine similarity, Spearman correlation, Jaccard index, projection AUROC, and cross-dataset projection transfer.
-- `scritps/pca_map_back/`  
-  Contains notebooks for PCA-space analyses and mapping directions back to the original representation space, including projection transfer, projection AUROC, and Spearman/Jaccard comparisons.
-
-### Embedding generation
-
-The embedding scripts expect benchmark CSV files such as `RQ.csv` or `SRAQ.csv` to be available from the working directory. Each script saves a `.pt` file containing an `embeddings` tensor plus metadata for the model, benchmark, and encoded column.
-
-Last-token embeddings:
+The embedding scripts expect the benchmark CSV to be available in the current working directory. For the included RQ data, run from `data/`:
 
 ```bash
-python scritps/generate_embeddings.py \
+cd data
+python ../scritps/generate_embeddings.py \
   --benchmark RQ \
   --model_name Qwen/Qwen3-4B \
   --col question_with_context
 ```
 
-Mean-pooled embeddings:
+This writes last-token embeddings to `data/embeddings/`. To generate mean-pooled embeddings instead:
 
 ```bash
-python scritps/generate_embeddings_mean.py \
+cd data
+python ../scritps/generate_embeddings_mean.py \
   --benchmark RQ \
   --model_name Qwen/Qwen3-4B \
   --col question_with_context
 ```
 
-ModernBERT CLS-token embeddings:
+For ModernBERT CLS-token embeddings:
 
 ```bash
-python scritps/generate_embeddings_bert.py \
+cd data
+python ../scritps/generate_embeddings_bert.py \
   --benchmark RQ \
   --col question_with_context
 ```
 
-### PCA transformation
+Each output `.pt` file stores an `embeddings` tensor with shape `(num_examples, num_layers, hidden_dim)` and metadata for the model, benchmark, and encoded column.
 
-To create PCA-compressed embeddings for a directory of `.pt` files:
+### 2. Apply PCA
+
+To project embeddings into a lower-dimensional PCA space:
 
 ```bash
-python scritps/pca_transform.py --emb_dir /path/to/embeddings --n_components 64
+python scritps/pca_transform.py \
+  --emb_dir data/embeddings \
+  --n_components 64
 ```
 
-Each input file is expected to contain an `embeddings` tensor with shape `(N, L, D)`. The script writes compressed embeddings to a sibling directory named `{emb_dir}_pca_{n_components}` and saves the corresponding PCA components, means, and explained-variance ratios under its `pca_basis/` subdirectory.
+The script writes compressed embeddings to a sibling directory named `{emb_dir}_pca_{n_components}` and saves PCA components, means, and explained-variance ratios under `pca_basis/`.
 
-### Linear model training
+### 3. Train Linear Probes
 
-The linear training code trains one probe per layer from a precomputed embedding file and a matching benchmark CSV:
+The linear training code trains one probe per layer from a saved embedding file and the matching dataset CSV:
 
 ```bash
 cd scritps/linear_model_training
 python train.py \
-  --emb_dir ../embeddings \
-  --dataset_dir ../.. \
+  --emb_dir ../../data/embeddings \
+  --dataset_dir ../../data \
   --benchmark RQ \
   --column question_with_context \
   --model Qwen3-4B \
   --loss_type logistic
 ```
 
-Use `--loss_type hinge` for the SVM-style linear probe. The helper scripts `run_training.sh` and `run_training_loop.sh` provide editable examples for running one model or a set of models.
+Use `--loss_type hinge` for the SVM-style probe. The helper scripts `run_training.sh` and `run_training_loop.sh` provide editable examples for single-model and multi-model runs.
 
-### Analysis notebooks
+### 4. Run Analyses
 
-The notebooks assume precomputed embedding files and, for PCA map-back analyses, PCA basis files produced by `scritps/pca_transform.py`. Run the notebooks after updating any local data paths to point to the relevant embedding and PCA-output directories.
+The notebooks assume precomputed embeddings and, for PCA map-back experiments, PCA basis files generated by `scritps/pca_transform.py`. Update notebook paths to point to the relevant local embedding, trained-probe, and PCA-output directories before running them.
+
+## Notes
+
+- The directory name is currently `scritps/` in the repository.
+- Large generated artifacts such as model embeddings, PCA-compressed embeddings, and trained probe outputs are not committed by default.
