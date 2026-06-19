@@ -30,16 +30,54 @@ The SRAQ data is not included in this repository. It should be obtained from the
 
 ## Code
 
-The analysis code is organized under `scritps/`:
+The code is organized under `scritps/`:
 
 - `scritps/diffmean_analysis.ipynb`  
   Runs the plain diffMean analysis on model representations.
+- `scritps/generate_embeddings.py`  
+  Generates layer-wise last-token embeddings from Hugging Face models for a benchmark CSV.
+- `scritps/generate_embeddings_mean.py`  
+  Generates layer-wise mean-pooled embeddings from Hugging Face models for a benchmark CSV.
+- `scritps/generate_embeddings_bert.py`  
+  Generates layer-wise CLS-token embeddings using ModernBERT.
 - `scritps/pca_transform.py`  
   Applies layer-wise PCA to embedding `.pt` files and saves both compressed embeddings and PCA bases.
-- `scritps/linear_models/`  
+- `scritps/linear_model_training/`  
+  Contains code for training layer-wise linear probes with logistic loss or hinge/SVM-style loss.
+- `scritps/linear_model_analysis/`  
   Contains notebooks for analyses in the original representation space, including within-dataset cosine similarity, Spearman correlation, Jaccard index, projection AUROC, and cross-dataset projection transfer.
 - `scritps/pca_map_back/`  
   Contains notebooks for PCA-space analyses and mapping directions back to the original representation space, including projection transfer, projection AUROC, and Spearman/Jaccard comparisons.
+
+### Embedding generation
+
+The embedding scripts expect benchmark CSV files such as `RQ.csv` or `SRAQ.csv` to be available from the working directory. Each script saves a `.pt` file containing an `embeddings` tensor plus metadata for the model, benchmark, and encoded column.
+
+Last-token embeddings:
+
+```bash
+python scritps/generate_embeddings.py \
+  --benchmark RQ \
+  --model_name Qwen/Qwen3-4B \
+  --col question_with_context
+```
+
+Mean-pooled embeddings:
+
+```bash
+python scritps/generate_embeddings_mean.py \
+  --benchmark RQ \
+  --model_name Qwen/Qwen3-4B \
+  --col question_with_context
+```
+
+ModernBERT CLS-token embeddings:
+
+```bash
+python scritps/generate_embeddings_bert.py \
+  --benchmark RQ \
+  --col question_with_context
+```
 
 ### PCA transformation
 
@@ -50,6 +88,23 @@ python scritps/pca_transform.py --emb_dir /path/to/embeddings --n_components 64
 ```
 
 Each input file is expected to contain an `embeddings` tensor with shape `(N, L, D)`. The script writes compressed embeddings to a sibling directory named `{emb_dir}_pca_{n_components}` and saves the corresponding PCA components, means, and explained-variance ratios under its `pca_basis/` subdirectory.
+
+### Linear model training
+
+The linear training code trains one probe per layer from a precomputed embedding file and a matching benchmark CSV:
+
+```bash
+cd scritps/linear_model_training
+python train.py \
+  --emb_dir ../embeddings \
+  --dataset_dir ../.. \
+  --benchmark RQ \
+  --column question_with_context \
+  --model Qwen3-4B \
+  --loss_type logistic
+```
+
+Use `--loss_type hinge` for the SVM-style linear probe. The helper scripts `run_training.sh` and `run_training_loop.sh` provide editable examples for running one model or a set of models.
 
 ### Analysis notebooks
 
