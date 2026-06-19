@@ -56,7 +56,7 @@ Generating embeddings for large language models requires enough GPU memory for t
 
 ## Data
 
-The repository includes the RQ dataset at `data/RQ.csv`. Each row contains a context, question, label, split metadata, and a concatenated `question_with_context` field used by the analyses.
+The repository includes the RQ dataset at `data/RQ.csv`. Each row contains a context, question, label, split metadata, and a concatenated `question_with_context` field used by the analyses. For more information about the dataset, see [Exploring the Role of Context to Distinguish Rhetorical and Information-Seeking Questions](https://aclanthology.org/2020.acl-srw.41/) (Zhuang and Riloff, ACL 2020).
 
 The SRAQ dataset is not included in this repository. To reproduce SRAQ experiments, obtain the data from [Studying Rhetorically Ambiguous Questions](https://aclanthology.org/2025.emnlp-main.1553/) (Ikumariegbe et al., EMNLP 2025) and place the corresponding CSV file in the local data directory.
 
