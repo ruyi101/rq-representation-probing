@@ -110,4 +110,4 @@ The notebooks assume precomputed embeddings and, for PCA map-back experiments, P
 
 ## Notes
 
-- Large generated artifacts such as model embeddings, PCA-compressed embeddings, and trained probe outputs are not committed by default.
+- Embeddings, PCA-compressed embeddings, PCA basis files, and trained probe outputs are reproducibility artifacts. They are not pre-generated in the repository; run the workflow above to create them locally before running the analysis notebooks.
