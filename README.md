@@ -24,4 +24,27 @@ Current focus of the project includes:
 
 ## Code
 
-Code, scripts, and instructions for reproducing the experiments will be added soon.
+The analysis code is organized under `scritps/`:
+
+- `scritps/diffmean_analysis.ipynb`  
+  Runs the plain diffMean analysis on model representations.
+- `scritps/pca_transform.py`  
+  Applies layer-wise PCA to embedding `.pt` files and saves both compressed embeddings and PCA bases.
+- `scritps/linear_models/`  
+  Contains notebooks for analyses in the original representation space, including within-dataset cosine similarity, Spearman correlation, Jaccard index, projection AUROC, and cross-dataset projection transfer.
+- `scritps/pca_map_back/`  
+  Contains notebooks for PCA-space analyses and mapping directions back to the original representation space, including projection transfer, projection AUROC, and Spearman/Jaccard comparisons.
+
+### PCA transformation
+
+To create PCA-compressed embeddings for a directory of `.pt` files:
+
+```bash
+python scritps/pca_transform.py --emb_dir /path/to/embeddings --n_components 64
+```
+
+Each input file is expected to contain an `embeddings` tensor with shape `(N, L, D)`. The script writes compressed embeddings to a sibling directory named `{emb_dir}_pca_{n_components}` and saves the corresponding PCA components, means, and explained-variance ratios under its `pca_basis/` subdirectory.
+
+### Analysis notebooks
+
+The notebooks assume precomputed embedding files and, for PCA map-back analyses, PCA basis files produced by `scritps/pca_transform.py`. Run the notebooks after updating any local data paths to point to the relevant embedding and PCA-output directories.
