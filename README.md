@@ -5,6 +5,8 @@ Official code and data for:
 **Rhetorical Questions in LLM Representations: A Linear Probing Study**  
 Louie Hong Yao, Vishesh Anand, Yuan Zhuang, Tianyu Jiang
 
+Paper: https://arxiv.org/abs/2604.14128
+
 ## Overview
 
 This repository studies how large language models encode rhetorical-question intent in their internal representations. Rather than treating rhetorical-question detection only as a downstream classification task, the project asks where rhetorical signals appear in model layers, how different linear probes capture those signals, and whether probes trained on different datasets recover the same representational direction.
