@@ -22,6 +22,12 @@ Current focus of the project includes:
 - studying cross-dataset transfer of rhetorical signals,
 - examining the heterogeneity of rhetorical cues in LLM representations.
 
+## Data
+
+The repository includes the RQ dataset at `data/RQ.csv`. The file contains context-question pairs with labels and dataset split metadata used for the rhetorical-question analyses.
+
+The SRAQ data is not included in this repository. It should be obtained from the source associated with the SRAQ paper and placed in the local data directory before running analyses that depend on SRAQ.
+
 ## Code
 
 The analysis code is organized under `scritps/`:
